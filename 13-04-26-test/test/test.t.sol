@@ -11,12 +11,15 @@ contract VaultTest is Test {
     Attacker attacker;
     FixedVault fixedVault;
 
+   
     address victim = address(1);
+    receive() external payable {}
     function setUp() public {
         vault = new BalanceVault();
         attacker = new Attacker(address(vault));
         fixedVault = new FixedVault();
     }
+    
    
     function testReentrancyAttack() public {
         vm.deal(victim, 5 ether);
@@ -24,7 +27,6 @@ contract VaultTest is Test {
         vault.deposit{value: 5 ether}();
 
         vm.deal(address(attacker), 1 ether);
-
         vm.prank(address(attacker));
         attacker.attack{value: 1 ether}();
 
@@ -48,11 +50,15 @@ contract VaultTest is Test {
     }
 
     function testLegitWithdrawStillWorks() public {
-        vm.deal(address(this), 2 ether);
-        fixedVault.deposit{value: 2 ether}();
+    address user = address(2);
 
-        fixedVault.withdraw(1 ether);
+    vm.deal(user, 2 ether);
 
-        assertEq(address(fixedVault).balance, 1 ether);
-    }
+    vm.startPrank(user);
+    fixedVault.deposit{value: 2 ether}();
+    fixedVault.withdraw(1 ether);
+    vm.stopPrank();
+
+    assertEq(address(fixedVault).balance, 1 ether);
+}
 }

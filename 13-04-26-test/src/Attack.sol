@@ -12,6 +12,7 @@ contract Attacker {
     constructor(address _vault) {
         vault = AttackVault(_vault);
     }
+    
 
     function attack() external payable {
         require(msg.value >= 1 ether, "Need at least 1 ETH");
